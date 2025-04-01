@@ -12,3 +12,7 @@ imageio[ffmpeg]
 ffmpeg-python
 openai
 torch
+boto3
+wave
+json
+io 
