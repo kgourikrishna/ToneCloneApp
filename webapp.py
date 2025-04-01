@@ -37,25 +37,35 @@ effect_to_image = {
     "delay": os.path.join(IMAGES_DIR, "pedal_DLY.png"),
     "chorus": os.path.join(IMAGES_DIR, "pedal_CHR.png"),
     "flanger": os.path.join(IMAGES_DIR, "pedal_FLG.png"),
-    "fuzz": os.path.join(IMAGES_DIR, "pedal_FUZ.png"),
+    "fuzz": os.path.join(IMAGES_DIR, "pedal_fuz.png"),
     "auto_filter": os.path.join(IMAGES_DIR, "pedal_FLT.png"),
-    "overdrive": os.path.join(IMAGES_DIR, "pedal_ODV.png"),
-    "octaver": os.path.join(IMAGES_DIR, "pedal_OCT.png"),
+    "overdrive": os.path.join(IMAGES_DIR, "pedal_odv.png"),
+    "octaver": os.path.join(IMAGES_DIR, "pedal_oct.png"),
     "tremolo": os.path.join(IMAGES_DIR, "pedal_TRM.png"),  
     "phaser": os.path.join(IMAGES_DIR, "pedal_PHZ.png"),
     "hall_reverb": os.path.join(IMAGES_DIR, "pedal_HLL.png"),
     "logo": os.path.join(IMAGES_DIR, "guitarlogo.png")
 }
 
+def downsample_waveform(y, target_len=4000):
+    """Downsample waveform to target number of points for display"""
+    if len(y) <= target_len:
+        return y
+    factor = len(y) // target_len
+    return y[::factor]
+
 def display_waveform(y, sr, start_time, end_time):
     """Create and return a Plotly waveform visualization"""
-    duration = librosa.get_duration(y=y, sr=sr)
-    time_axis = np.linspace(0, duration, num=len(y))
+
+    full_duration = librosa.get_duration(y=y, sr=sr)
+
+    y_ds = downsample_waveform(y)
+    time_axis = np.linspace(0, full_duration, num=len(y_ds))
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=time_axis, 
-        y=y, 
+        y=y_ds, 
         mode="lines",
         name="",
         hovertemplate="Time: %{x:.2f} sec"
@@ -90,12 +100,12 @@ def display_waveform(y, sr, start_time, end_time):
         # Fix y-axis range to prevent moving up and down
         yaxis=dict(
             fixedrange=True,
-            range=[min(y)*1.1, max(y)*1.1]  # Set fixed range with small padding
+            range=[min(y_ds)*1.1, max(y_ds)*1.1]  # Set fixed range with small padding
         ),
         # Fix x-axis range to prevent horizontal panning
         xaxis=dict(
             fixedrange=True,
-            range=[0, duration]  # Set range from 0 to full duration
+            range=[0, full_duration]  # Set range from 0 to full duration
         ),
         # Disable most interactive features
         dragmode=False
@@ -253,6 +263,12 @@ def classify_tone():
                     st.session_state['top_3_effects'] = top_3_effects
                     st.session_state['user_education'] = user_education
                     st.session_state['last_classification_type'] = "full_song"
+
+                    # st.write(st.session_state['raw_predictions'])
+                    # st.write(st.session_state['summarized_segment_results'])
+                    # st.write(st.session_state['predictions_summary_for_llm'])
+                    # st.write(st.session_state['top_3_effects'])
+                    # st.write(st.session_state['user_education'])
 
                     return "Classification Complete"
                 except Exception as e:
@@ -422,7 +438,7 @@ def show_home_page():
         st.write("ToneClone addresses this challenge by analyzing guitar audio to identify the effects used and provides accessible, tailored guidance to educate guitarists about effects. This approach allows users to bridge the gap between hearing and recreating professional-quality sounds, offering a unique combination of analysis and education that is not available in other products. A simple and intuitive method for new guitar players to analyze guitar tones and receive a step by step instruction to replicate.")
 
     st.write("""
-    <b style="color: #edbb24;">Navigate the sidebar to upload an audio.</b><br>
+    <b style="color: #edbb24;">Navigate the sidebar to upload an audio file.</b><br>
     """, unsafe_allow_html=True)
 
 def show_about_page():
@@ -489,7 +505,7 @@ def show_audio_page():
                 st.markdown(f"## {selected.capitalize()}")
     
                 effect_data = st.session_state['user_education'][selected]
-                st.markdown(f"**Confidence:**\n\n {effect_data.get('confidence_judgement', 'N/A')}")
+                st.markdown(f"**Confidence:** {effect_data.get('confidence_judgement', 'N/A')}")
                 st.markdown(f"**What it does:**\n\n {effect_data.get('description_and_use', 'N/A')}")
                 st.markdown(f"**Example song/artist:**\n\n {effect_data.get('artist_or_song_example', 'N/A')}")
                 st.markdown(f"**Recommended pedals:**\n\n {effect_data.get('recommended_pedals', 'N/A')}")

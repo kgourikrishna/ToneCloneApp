@@ -80,10 +80,9 @@ class ToneCloneChatAgent:
 
         user_message ={ 
                         "role": "user",
-                        "content": f"The detected effects are: {', '.join(effects)}. "
-                        f"{model_summary}. "
+                        "content": f"{model_summary}. "
                         "Respond with a JSON object that provides information about each of these effects, "
-                        "thoroughly addresses the certainty that the effect is in the recording always erring on the less certain side, "
+                        "thoroughly addresses the certainty that the effect is in the recording, "
                         "details a well-known song or artist that uses them (in a complete sentence), "
                         "and provides comprehensive, specific pedal recommendations for recreating the effect. "
                         "Always use complete sentences and provide thorough responses for each attribute in the JSON."
@@ -110,7 +109,10 @@ class ToneCloneChatAgent:
                                     "type": "object",
                                     "properties": {
                                         "name": { "type": "string" },
-                                        "confidence_judgement": { "type": "string" },
+                                        "confidence_judgement": {
+                                            "type": "string",
+                                            "enum": ["Uncertain", "Confident", "Very Confident"]
+                                        },
                                         "description_and_use": { "type": "string" },
                                         "artist_or_song_example": { "type": "string" },
                                         "recommended_pedals": { "type": "string" }
