@@ -11,3 +11,4 @@ audioread
 imageio[ffmpeg]
 ffmpeg-python
 openai
+torch
