@@ -14,5 +14,3 @@ openai
 torch
 boto3
 wave
-json
-io 
