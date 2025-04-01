@@ -1,0 +1,13 @@
+streamlit
+librosa
+numpy
+matplotlib
+pydub
+Pillow
+plotly
+scipy
+soundfile
+audioread
+imageio[ffmpeg]
+ffmpeg-python
+openai
