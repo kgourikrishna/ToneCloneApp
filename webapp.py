@@ -32,18 +32,18 @@ Path(AUDIO_DIR).mkdir(parents=True, exist_ok=True)
 
 # Effect to image 
 effect_to_image = {
-    "plate_reverb": os.path.join(IMAGES_DIR, "pedal_PLT.png"),
+    "plate reverb": os.path.join(IMAGES_DIR, "pedal_PLT.png"),
     "distortion": os.path.join(IMAGES_DIR, "pedal_DST.png"),
     "delay": os.path.join(IMAGES_DIR, "pedal_DLY.png"),
     "chorus": os.path.join(IMAGES_DIR, "pedal_CHR.png"),
     "flanger": os.path.join(IMAGES_DIR, "pedal_FLG.png"),
-    "fuzz": os.path.join(IMAGES_DIR, "pedal_FUZ.png"),
-    "auto_filter": os.path.join(IMAGES_DIR, "pedal_FLT.png"),
-    "overdrive": os.path.join(IMAGES_DIR, "pedal_ODV.png"),
-    "octaver": os.path.join(IMAGES_DIR, "pedal_OCT.png"),
+    "fuzz": os.path.join(IMAGES_DIR, "pedal_fuz.png"),
+    "auto filter": os.path.join(IMAGES_DIR, "pedal_FLT.png"),
+    "overdrive": os.path.join(IMAGES_DIR, "pedal_odv.png"),
+    "octaver": os.path.join(IMAGES_DIR, "pedal_oct.png"),
     "tremolo": os.path.join(IMAGES_DIR, "pedal_TRM.png"),  
     "phaser": os.path.join(IMAGES_DIR, "pedal_PHZ.png"),
-    "hall_reverb": os.path.join(IMAGES_DIR, "pedal_HLL.png"),
+    "hall reverb": os.path.join(IMAGES_DIR, "pedal_HLL.png"),
     "logo": os.path.join(IMAGES_DIR, "guitarlogo.png")
 }
 
@@ -151,10 +151,26 @@ def classify_tone():
     # Upload sound
     uploaded_file = st.file_uploader(' ', type='wav')
     
+    # Reset session if file is removed or changed
+    prev_filename = st.session_state.get("last_uploaded_filename")
+    curr_filename = uploaded_file.name if uploaded_file else None
+    
+    if curr_filename != prev_filename:
+        for key in [
+            'top_3_effects', 'user_education', 'raw_predictions',
+            'summarized_segment_results', 'predictions_summary_for_llm',
+            'selected_effect', 'preview_path', 'cropped_path',
+            'cropped_duration', 'last_classification_type',
+            'current_audio_path', 'current_audio_duration'
+        ]:
+            st.session_state.pop(key, None)
+        
+        st.session_state["last_uploaded_filename"] = curr_filename
+
     if uploaded_file is None:
         st.write('Please upload a WAV file to begin')
         return "No file uploaded"
-    
+
     # Process the uploaded file
     file_path = Path(AUDIO_DIR) / uploaded_file.name
     
@@ -264,8 +280,8 @@ def classify_tone():
                     st.session_state['user_education'] = user_education
                     st.session_state['last_classification_type'] = "full_song"
 
-                    # st.write(st.session_state['raw_predictions'])
-                    # st.write(st.session_state['summarized_segment_results'])
+                    #st.write(st.session_state['raw_predictions'])
+                    #st.write(st.session_state['summarized_segment_results'])
                     # st.write(st.session_state['predictions_summary_for_llm'])
                     # st.write(st.session_state['top_3_effects'])
                     # st.write(st.session_state['user_education'])
@@ -335,6 +351,12 @@ def apply_custom_css():
         /* Sidebar Styling */
         .stSidebar {
             background-color: #5c6d74 !important;
+        }
+
+        .plot-container > div {
+            border-radius: 20px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
 
         /* Ensure all sidebar text is visible */
@@ -422,9 +444,28 @@ def show_home_page():
     
     # Description
     st.markdown(
-        '<h3 style="color:#839196;"><i>Many beginning guitarists struggle to achieve the sounds they hear in professional recordings. Learning to play is already hard, but understanding how effects shape tone — and how to use them effectively — is even harder.</i></h3><br><br><br>',
+        '<h3 style="color:#839196;"><i>Many beginning guitarists struggle to achieve the sounds they hear in professional recordings. Learning to play is already hard, but understanding how effects shape tone — and how to use them effectively — is even harder.</i></h3><br>',
         unsafe_allow_html=True,
     )
+
+    st.markdown("---")
+
+    mission_col1, mission_col2 = st.columns([2, 1])
+
+    with mission_col1:
+        st.markdown(
+            """
+            <h2 style='color:#ffffff; text-align: center;'>Our Mission</h2>
+            <p style='color:#ffffff; font-size:22px; font-style:italic; text-align: center'>
+            To provide future guitarists with the tools to effortlessly replicate tones through
+            machine learning, removing barriers to creativity.
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with mission_col2:
+        st.image("images/guitar_black_white.png", caption="", use_container_width=True)
 
     # Two-column layout
     col1, col2 = st.columns(2)
@@ -435,7 +476,16 @@ def show_home_page():
 
     with col2:
         st.subheader("How ToneClone Helps")
-        st.write("ToneClone addresses this challenge by analyzing guitar audio to identify the effects used and provides accessible, tailored guidance to educate guitarists about effects. This approach allows users to bridge the gap between hearing and recreating professional-quality sounds, offering a unique combination of analysis and education that is not available in other products. A simple and intuitive method for new guitar players to analyze guitar tones and receive a step by step instruction to replicate.")
+        st.write("ToneClone addresses this challenge by analyzing guitar audio to identify the effects used and provides accessible, tailored guidance to educate guitarists about effects. This approach allows users to bridge the gap between hearing and recreating professional-quality sounds, offering a unique combination of analysis and education that is not available in other products.")
+
+    st.image("images/spectrogram.png", caption="", use_container_width=True)
+
+    st.image("images/data_diagram.png", caption="", use_container_width=True)
+
+    st.subheader("Data Source and Data Science Approach")
+    st.write("What makes ToneClone possible is the creation of a new, synthetic dataset of labeled guitar effects. We started with publicly available guitar arrangements and converted them to MIDI. These tracks were then processed through a high-quality virtual guitar instrument to generate realistic, clean guitar recordings. Next, we applied a wide range of digital effects and labeled them for later model training.")
+    st.write("This dataset includes 100 songs, each processed with 45 different effect combinations, resulting in more than 450 hours of data.")
+
 
     st.write("""
     <b style="color: #edbb24;">Navigate the sidebar to upload an audio file.</b><br>
@@ -493,7 +543,7 @@ def show_audio_page():
     
                         # Fake center with div
                         st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-                        if st.button(f"Learn About {effect.capitalize()}", key=f"{effect}_btn"):
+                        if st.button(f"Learn About {effect.title()}", key=f"{effect}_btn"):
                             st.session_state['selected_effect'] = effect
                         st.markdown("</div>", unsafe_allow_html=True)
                     else:
@@ -506,9 +556,12 @@ def show_audio_page():
     
                 effect_data = st.session_state['user_education'][selected]
                 st.markdown(f"**Confidence:** {effect_data.get('confidence_judgement', 'N/A')}")
-                st.markdown(f"**What it does:**\n\n {effect_data.get('description_and_use', 'N/A')}")
-                st.markdown(f"**Example song/artist:**\n\n {effect_data.get('artist_or_song_example', 'N/A')}")
-                st.markdown(f"**Recommended pedals:**\n\n {effect_data.get('recommended_pedals', 'N/A')}")
+                with st.expander("Description"):
+                    st.markdown(f"{effect_data.get('detailed_description_and_common_use_cases', 'N/A')}")
+                with st.expander("Notable Artist Usage"):
+                    st.markdown(f"{effect_data.get('notable_artist_usage', 'N/A')}")
+                with st.expander("Recommended Pedals"):
+                    st.markdown(f"{effect_data.get('extensive_pedal_recommendations_with_brief_justifications', 'N/A')}")
 
                 #st.write(st.session_state['raw_predictions'])
                 #st.write(st.session_state['summarized_segment_results'])

@@ -81,11 +81,12 @@ class ToneCloneChatAgent:
         user_message ={ 
                         "role": "user",
                         "content": f"{model_summary}. "
-                        "Respond with a JSON object that provides information about each of these effects, "
-                        "thoroughly addresses the certainty that the effect is in the recording, "
-                        "details a well-known song or artist that uses them (in a complete sentence), "
-                        "and provides comprehensive, specific pedal recommendations for recreating the effect. "
-                        "Always use complete sentences and provide thorough responses for each attribute in the JSON."
+                        "Respond with a JSON object that provides information about each of these effects. "
+                        "Use a friendly, confident tone and assume the user is an aspiring guitarist eager to learn. "
+                        "Each attribute in the JSON should be written in full, engaging sentences with no formatting. "
+                        "For `detailed_description_and_common_use_cases`, write 3–5 sentences explaining how the effect works, what it sounds like, and when it's typically used. "
+                        "For `extensive_pedal_recommendations_with_brief_justifications`, give 2–3 specific pedal models and explain briefly why each one is a good choice. "
+                        "For `notable_artist_usage`, give the name of a famous artist or song that uses this effect, and explain briefly how the effect is used in that musical context."
                 }
         
         print(user_message)
@@ -113,11 +114,11 @@ class ToneCloneChatAgent:
                                             "type": "string",
                                             "enum": ["Uncertain", "Confident", "Very Confident"]
                                         },
-                                        "description_and_use": { "type": "string" },
-                                        "artist_or_song_example": { "type": "string" },
-                                        "recommended_pedals": { "type": "string" }
+                                        "detailed_description_and_common_use_cases": { "type": "string" },
+                                        "notable_artist_usage": { "type": "string" },
+                                        "extensive_pedal_recommendations_with_brief_justifications": { "type": "string" }
                                     },
-                                    "required": ["name", "confidence_judgement", "description_and_use", "artist_or_song_example", "recommended_pedals"],
+                                    "required": ["name", "confidence_judgement", "detailed_description_and_common_use_cases", "notable_artist_usage", "extensive_pedal_recommendations_with_brief_justifications"],
                                     "additionalProperties": False
                                 }
                             }

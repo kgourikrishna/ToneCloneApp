@@ -38,20 +38,20 @@ class ToneCloneAnalyzer:
             "chorus": (0.5, 0.7, 0.9),
             "flanger": (0.5, 0.7, 0.9),
             "delay": (0.5, 0.7, 0.9),
-            "plate_reverb": (0.5, 0.7, 0.9),
+            "plate reverb": (0.5, 0.7, 0.9),
             "overdrive": (0.01, 0.3, 0.5),
             "distortion": (0.01, 0.3, 0.5),
             "fuzz": (0.01, 0.3, 0.5),
             "tremolo": (0.5, 0.7, 0.9),
             "phaser": (0.5, 0.7, 0.9),
-            "hall_reverb": (0.5, 0.7, 0.9),
+            "hall reverb": (0.5, 0.7, 0.9),
             "octaver": (0.9999, 0.999999, 0.99999999),
-            "auto_filter": (0.9999, 0.999999, 0.99999999)
+            "auto filter": (0.9999, 0.999999, 0.99999999)
         }
         self.families = {
             "distortion_family": ["overdrive", "distortion", "fuzz"],
             "modulation_family": ["chorus", "flanger", "phaser"],
-            "reverb_family": ["plate_reverb", "hall_reverb"]
+            "reverb_family": ["plate reverb", "hall reverb"]
         }
         self.summarized_segment_results = None
         self.predictions_summary_for_llm = None
