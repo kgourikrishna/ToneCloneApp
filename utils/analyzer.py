@@ -90,6 +90,11 @@ class ToneCloneAnalyzer:
                 segments.append(segment_data)
                 #print(f"Segment {len(segments)}: Start sample {start}, End sample {start + samples_per_segment}")
                 start += step_size  # Move forward based on intended overlap
+            if start < len(audio_data):
+                segment_data = audio_data[start:]
+                padding = samples_per_segment - len(segment_data)
+                segment_data = np.pad(segment_data, (0, padding), mode='constant')
+                segments.append(segment_data)
 
         return segments, sample_rate
 
