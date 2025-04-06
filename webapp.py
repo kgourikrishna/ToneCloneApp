@@ -7,8 +7,11 @@ import os
 import librosa
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import matplotlib.ticker as ticker
 import librosa.display
 import plotly.graph_objects as go
+import json
 from pathlib import Path
 from pydub import AudioSegment
 from pydub.utils import which
@@ -37,10 +40,10 @@ effect_to_image = {
     "delay": os.path.join(IMAGES_DIR, "pedal_DLY.png"),
     "chorus": os.path.join(IMAGES_DIR, "pedal_CHR.png"),
     "flanger": os.path.join(IMAGES_DIR, "pedal_FLG.png"),
-    "fuzz": os.path.join(IMAGES_DIR, "pedal_FUZ.png"),
+    "fuzz": os.path.join(IMAGES_DIR, "pedal_fuz.png"),
     "auto filter": os.path.join(IMAGES_DIR, "pedal_FLT.png"),
-    "overdrive": os.path.join(IMAGES_DIR, "pedal_ODV.png"),
-    "octaver": os.path.join(IMAGES_DIR, "pedal_OCT.png"),
+    "overdrive": os.path.join(IMAGES_DIR, "pedal_odv.png"),
+    "octaver": os.path.join(IMAGES_DIR, "pedal_oct.png"),
     "tremolo": os.path.join(IMAGES_DIR, "pedal_TRM.png"),  
     "phaser": os.path.join(IMAGES_DIR, "pedal_PHZ.png"),
     "hall reverb": os.path.join(IMAGES_DIR, "pedal_HLL.png"),
@@ -130,6 +133,78 @@ def display_waveform(y, sr, start_time, end_time):
     
     # Return both figure and config
     return fig
+def display_timeline(segments, sample_length, overlap):
+    """
+    Displays a timeline graph of detected effects with probabilities shown by intensity
+    """
+
+    def time_to_seconds(t):
+        minutes, seconds = map(int, t.split(':'))
+        return minutes * 60 + seconds
+
+    effects = dict()
+    for seg in segments:
+        for eff in segments[seg][0]:
+            if eff not in effects:
+                effects[eff] = 1
+            else:
+                effects[eff] += 1
+    effects = sorted(effects.keys(), key=lambda x: x, reverse=False)
+    start_time = st.session_state['start_time']
+    end_time = st.session_state['end_time']
+
+    time_resolution = sample_length * (100.0 - overlap) / 100.0
+    time_axis = np.arange(start_time, end_time, time_resolution)
+
+    base_colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ff8800', '#88ff00',
+                   '#00ff88', '#0088ff', '#8800ff', '#ff0088']
+
+    fig, ax = plt.subplots(figsize=(12, len(effects) * 1.2))
+
+    for i, eff in enumerate(effects):
+        for t in time_axis:
+            overlapping = [
+                segments[seg] for seg in segments
+                if eff in segments[seg][0]
+                and t <= int(seg.split("Segment ")[1]) * time_resolution < t + time_resolution
+            ]
+            if overlapping:
+                avg_intensity = np.mean([seg[1][eff] for seg in overlapping])
+            else:
+                avg_intensity = 0
+            rect = patches.Rectangle(
+                (t, i + 0.25), time_resolution, 0.5,
+                color=base_colors[i % len(base_colors)],
+                alpha=avg_intensity ** 2,
+                linewidth=0
+            )
+            ax.add_patch(rect)
+        ax.text(end_time + 1, i + 0.5, eff.replace('_', ' ').title(),
+                verticalalignment='center', fontsize=12)
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+
+    ax.set_xlim(start_time, end_time)
+    ax.set_ylim(0, len(effects))
+    ax.set_yticks([])
+
+    tick_interval = 20
+    ticks = np.arange(start_time, end_time, tick_interval)
+    if ticks[-1] < end_time:
+        ticks = np.append(ticks, end_time)
+    ax.set_xticks(ticks)
+
+    def format_func(x, pos):
+        minutes = int(x // 60)
+        seconds = int(x % 60)
+        return f'{minutes:02d}:{seconds:02d}'
+
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(format_func))
+    ax.set_xlabel("Time (mm:ss)")
+    return fig
 
 def classify_song(file_path):
     tcanalyzer = ToneCloneAnalyzer(str(file_path), openai_key=st.secrets["openai_key"])
@@ -143,6 +218,8 @@ def classify_song(file_path):
     st.session_state['raw_predictions'] = raw_predictions
     st.session_state['summarized_segment_results'] = summarized_segment_results
     st.session_state['predictions_summary_for_llm'] = predictions_summary_for_llm
+    st.session_state['timeline_visualization'] = display_timeline(raw_predictions, tcanalyzer.sample_length,
+                                                                  tcanalyzer.overlap)
     tcanalyzer.chatgpt_prompt()
     user_education = tcanalyzer.parse_effects_json()
 
@@ -209,7 +286,9 @@ def classify_tone():
         value=(0.0, duration),  
         step=0.1
     )
-    
+
+    st.session_state['start_time'] = start_time
+    st.session_state['end_time'] = end_time
 
         # Apply crop and preview
     start_ms, end_ms = int(start_time * 1000), int(end_time * 1000)
@@ -771,7 +850,15 @@ def show_audio_page():
                     
         # Add a divider
         st.markdown("<hr style='border-top: 1px solid #555; margin: 10px 0;'>", unsafe_allow_html=True)
-        
+
+        if 'timeline_visualization' in st.session_state and st.session_state['timeline_visualization']:
+            st.subheader("Timeline of Detected Effects")
+            fig = st.session_state["timeline_visualization"]
+            st.pyplot(fig, use_container_width=True)
+                
+        # Add a divider
+        st.markdown("<hr style='border-top: 1px solid #555; margin: 10px 0;'>", unsafe_allow_html=True)
+
         if 'top_3_effects' in st.session_state and st.session_state['top_3_effects']:
             st.subheader("Top Effects Across All Segments")
         
