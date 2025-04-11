@@ -933,7 +933,7 @@ def how_page():
     """How it Works."""
     st.markdown("""
         <div class="title-text" style="font-size: 42px; letter-spacing: -0.5px; margin-bottom: 0px;">ToneClone</div>
-        <div class="subtitle-text"Explanation</div>
+        <div class="subtitle-text">Explanation</div>
         """,
     unsafe_allow_html=True)
     spectrogram = effect_to_image.get("spectrogram")
