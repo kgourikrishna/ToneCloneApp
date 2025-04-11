@@ -51,7 +51,8 @@ effect_to_image = {
     "Gary": os.path.join(IMAGES_DIR, "Gary.png"),
     "effects": os.path.join(IMAGES_DIR, "effects.png"),
     "spectrogram": os.path.join(IMAGES_DIR, "spectrogram.png"),
-    "diagram": os.path.join(IMAGES_DIR, "data_diagram.png")
+    "diagram": os.path.join(IMAGES_DIR, "data_diagram.png"),
+    "architecture": os.path.join(IMAGES_DIR, "toneclone-arch.png")
 }
 
 def downsample_waveform(y, target_len=4000):
@@ -228,7 +229,8 @@ def classify_song(file_path):
 
 def classify_tone():
     """Main function for tone classification interface."""
-    st.markdown("<h3 style='color: #fcfcfc;'>Upload your song sample for your ToneClone result!</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #667085; font-weight: 600; letter-spacing: -0.5px; margin-top: 0;'>Upload your song sample for your ToneClone result!</h3>""",
+ unsafe_allow_html=True)
 
     # Upload sound
     uploaded_file = st.file_uploader(' ', type='wav')
@@ -448,7 +450,7 @@ def apply_custom_css():
             font-family: 'Dancing Script', cursive;
             font-size: 28px;
             font-weight: 700;
-            color: #667085;
+            color: #2C7DA0;
             margin: 0;
             letter-spacing: -0.5px;
             padding: 8px 15px;
@@ -456,6 +458,9 @@ def apply_custom_css():
             position: relative;
             z-index: 1;
             border-radius: 8px;
+           
+            
+            text-shadow: 2px 2px 3px rgba(0,0,0,0.2);
         }
 
         /* Navigation styling - tech-focused */
@@ -516,7 +521,7 @@ def apply_custom_css():
         }
                 
         
-        /* Subtitle text for the tech look */
+        /* Subtitle text */
         .subtitle-text {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 16px;
@@ -931,52 +936,56 @@ def how_page():
         <div class="subtitle-text">Explaination</div>
         """,
     unsafe_allow_html=True)
+    spectrogram = effect_to_image.get("spectrogram")
+    diagram = effect_to_image.get("diagram")
+    architecture = effect_to_image.get("architecture")
+
+    with open(architecture, "rb") as img_file:  
+        architecture_base64 = base64.b64encode(img_file.read()).decode()
+    with open(spectrogram, "rb") as img_file:
+        spectrogram_base64 = base64.b64encode(img_file.read()).decode()
+    
+
     st.subheader("Data Source and Data Science Approach")
+    st.write("Our team has created a simple, user-friendly web application that beginner guitar players can use to learn about different guitar effects used in their favorite songs. Users can upload a .wav file of the guitar segment or full song they would like to learn about. If there is a certain segment they are interested in, they can use the cropping feature to only analyze that portion of the song. Once the upload process is complete, users can click on the classify button.")
+    with open(architecture, "rb") as img_file:
+                architecture_base64 = base64.b64encode(img_file.read()).decode()
+    st.markdown(
+                f"""
+                <div style="text-align: center; margin-bottom: 15px">
+                <img src="data:image/png;base64,{architecture_base64}" style="width: 40%;">
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    st.write("Under the hood, the .wav file is converted into 10 second spectrograms which are then ultimately represented by a single numpy array. This array is sent up to our custom sagemaker endpoint which hosts our fine-tuned PANN model. Once the input is fed through the model, the endpoint returns the predictions. The predictions are then processed, thresholded, and fed to ChatGPT to provide dynamic user feedback. Ultimately, the output serves the user the top three effects found in the submitted segment, a timeline of where those effects are found in the song, and further descriptive information about each effect such as famous songs using those effects and recommended effect pedals.")
+    st.markdown(
+        f"""
+        <div style="text-align: center; margin-bottom: 15px;">
+        <img src="data:image/png;base64,{spectrogram_base64}" style="width: 60%;">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.write("What makes ToneClone possible is the creation of a new, synthetic dataset of labeled guitar effects. We started with publicly available guitar arrangements and converted them to MIDI. These tracks were then processed through a high-quality virtual guitar instrument to generate realistic, clean guitar recordings. Next, we applied a wide range of digital effects and labeled them for later model training.")
     st.write("This dataset includes 100 songs, each processed with 45 different effect combinations, resulting in more than 450 hours of data.")
     
-    spectrogram = effect_to_image.get("spectrogram")
-    diagram = effect_to_image.get("diagram")
-    
-    # Custom CSS to ensure black background for columns
-    st.markdown("""
-    <style>
-    div.stColumn {
-        background-color: black !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if spectrogram is not None and os.path.exists(spectrogram):
-            # Encode image to base64 for inline HTML
-            with open(spectrogram, "rb") as img_file:
-                spectrogram_base64 = base64.b64encode(img_file.read()).decode()
-            # Display the spectrogram image
-            st.markdown(
-                f"""
-                <div style="text-align: center; margin-bottom: 15px; background-color: black;">
-                <img src="data:image/png;base64,{spectrogram_base64}" style="width: 100%;">
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-    
-    with col2:
-        if diagram is not None and os.path.exists(diagram):
-            # Encode image to base64 for inline HTML
-            with open(diagram, "rb") as img_file:
-                diagram_base64 = base64.b64encode(img_file.read()).decode()
-            # Display the diagram image
-            st.markdown(
-                f"""
-                <div style="text-align: center; margin-bottom: 15px; background-color: black;">
-                <img src="data:image/png;base64,{diagram_base64}" style="width: 100%;">
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    with open(diagram, "rb") as img_file:
+        diagram_base64 = base64.b64encode(img_file.read()).decode()
+    # Display the diagram image
+    st.markdown(
+        f"""
+        <div style="text-align: center; margin-bottom: 15px;">
+        <img src="data:image/png;base64,{diagram_base64}" style="width: 60%;">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+
 
 def show_audio_page():
     # Add this custom CSS to force columns to display side by side
@@ -1018,7 +1027,8 @@ def show_audio_page():
 
     with col2:  # RIGHT COLUMN: Effects & Classification
         # Add classification buttons at the top of the right column
-        st.markdown("<h3 style='color: #fcfcfc;'>Effects Classification</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #667085; font-weight: 600; letter-spacing: -0.5px; margin-top: 0;'>Effects Classification</h3>""",
+ unsafe_allow_html=True)
         classify_cols = st.columns(2)
         
         with classify_cols[0]:
@@ -1117,10 +1127,12 @@ def main():
             # Create HTML for logo and title in sidebar
             st.markdown(
                 f"""
-                <div class="sidebar-logo-container">
-                    <img src="data:image/jpeg;base64,{logo_base64}" class="sidebar-logo">
-                    <div class="sidebar-title">ToneClone</div>
-                </div>
+            
+
+                <div class="title-container" style="display: flex; align-items: center; margin-bottom: 30px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+ <img src="data:image/jpeg;base64,{logo_base64}" style="width: 80px; height: auto; border-radius: 10px; margin-right: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); background-color: black;">
+ <div class="sidebar-title">ToneClone</div>
+ <div>
                 """,
                 unsafe_allow_html=True,
             )
