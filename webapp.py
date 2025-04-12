@@ -48,11 +48,14 @@ effect_to_image = {
     "phaser": os.path.join(IMAGES_DIR, "pedal_PHZ.png"),
     "hall reverb": os.path.join(IMAGES_DIR, "pedal_HLL.png"),
     "logo": os.path.join(IMAGES_DIR, "guitarlogo.png"),
-    "Gary": os.path.join(IMAGES_DIR, "Gary.png"),
+    "Gary": os.path.join(IMAGES_DIR, "GaryPic.png"),
     "effects": os.path.join(IMAGES_DIR, "effects.png"),
     "spectrogram": os.path.join(IMAGES_DIR, "spectrogram.png"),
     "diagram": os.path.join(IMAGES_DIR, "data_diagram.png"),
-    "architecture": os.path.join(IMAGES_DIR, "toneclone-arch.png")
+    "architecture": os.path.join(IMAGES_DIR, "toneclone-arch.png"),
+    "Kushal": os.path.join(IMAGES_DIR, "Kushal.png"),
+    "Rex": os.path.join(IMAGES_DIR, "Rex.png"),
+    "Jen": os.path.join(IMAGES_DIR, "Jen.jpg")
 }
 
 def downsample_waveform(y, target_len=4000):
@@ -915,6 +918,52 @@ def show_home_page():
     
     # Close the container div
     st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown(
+        """
+        <div style="background: rgba(32, 36, 45, 0.6); padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center; border: 1px solid rgba(211, 173, 81, 0.3);">
+            <p style="color: #D3AD51; font-weight: 600; margin: 0; font-size: 16px;">
+                Customer Testimonials
+            </p>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+
+    col1 = st.columns([1])[0] 
+
+    with col1:
+
+    #     st.markdown("<h3 style='color: #667085; font-weight: 600; letter-spacing: -0.5px; margin-top: 0;'>But don't just take our word for it</h3>""",
+    # unsafe_allow_html=True)
+
+        # First testimonial
+        st.markdown("""
+        <h2 style="font-size: 25px; font-weight: bold; margin-bottom: 0px; font-style: italic;">"So easy!"</h2>
+        <p style="color: #444; line-height: 1.6; margin-bottom: 10px;">
+        I've always struggled to identify effects in my favorite songs, but ToneClone made it incredibly simple. Just upload, analyze, and boom! I finally know what pedals to buy. This tool has saved me countless hours of research and frustration trying to match tones by ear.
+        </p>
+        <p style="font-family: cursive; color: #333; font-size: 18px; margin-bottom: 0;">- Shanon, from New York</p>
+        """, unsafe_allow_html=True)
+
+        # Second testimonial
+        st.markdown("""
+        <h2 style="font-size: 25px; font-weight: bold; margin-bottom: 0px; font-style: italic;">"I replicated my favorite artist's sound!"</h2>
+        <p style="color: #444; line-height: 1.6; margin-bottom: 10px;">
+        I've been trying to nail John Mayer's tone for years without success. ToneClone identified the exact combination of effects he uses - turns out I was missing a distortion pedal! After purchasing the pedal ToneClone suggested, my friends can't believe how authentic my sound is now.
+        </p>
+        <p style="font-family: cursive; color: #333; font-size: 18px; margin-bottom: 0;">- Pete, from Texas</p>
+        """, unsafe_allow_html=True)
+
+        # Third testimonial
+        st.markdown("""
+        <h2 style="font-size: 25px; font-weight: bold; margin-bottom: 0px; font-style: italic;">"Why didn't this exist sooner?"</h2>
+        <p style="color: #444; line-height: 1.6; margin-bottom: 10px;">
+        As a guitar teacher, I've needed something like ToneClone for years. Now my students can upload songs they want to learn and immediately understand the effects being used. It's revolutionized my teaching approach and my students are making faster progress than ever before. Simply brilliant.
+        </p>
+        <p style="font-family: cursive; color: #333; font-size: 18px; margin-bottom: 0;">- Aaron, from California</p>
+        """, unsafe_allow_html=True)
+
 
     # Tech-styled CTA
     st.markdown(
@@ -928,62 +977,186 @@ def show_home_page():
         unsafe_allow_html=True
     )
 
-
 def how_page():
     """How it Works."""
     st.markdown("""
+    <style>
+    /* Force columns to display side by side with specific width */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 1rem !important;
+    }
+    
+    /* Set explicit width for each column */
+    [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        width: 50% !important;
+        min-width: 48% !important;
+        flex: 1 1 auto !important;
+    }
+    
+    /* Make sure column content takes full width */
+    [data-testid="column"] > div {
+        width: 100% !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
         <div class="title-text" style="font-size: 42px; letter-spacing: -0.5px; margin-bottom: 0px;">ToneClone</div>
-        <div class="subtitle-text">Explanation</div>
+        <div class="subtitle-text">Explaination</div>
         """,
     unsafe_allow_html=True)
-    spectrogram = effect_to_image.get("spectrogram")
-    diagram = effect_to_image.get("diagram")
-    architecture = effect_to_image.get("architecture")
-
-    with open(architecture, "rb") as img_file:  
-        architecture_base64 = base64.b64encode(img_file.read()).decode()
-    with open(spectrogram, "rb") as img_file:
-        spectrogram_base64 = base64.b64encode(img_file.read()).decode()
     
+    
+    col1 = st.columns([1])[0] 
 
-    st.subheader("Data Source and Data Science Approach")
-    st.write("Our team has created a simple, user-friendly web application that beginner guitar players can use to learn about different guitar effects used in their favorite songs. Users can upload a .wav file of the guitar segment or full song they would like to learn about. If there is a certain segment they are interested in, they can use the cropping feature to only analyze that portion of the song. Once the upload process is complete, users can click on the classify button.")
-    with open(architecture, "rb") as img_file:
-                architecture_base64 = base64.b64encode(img_file.read()).decode()
-    st.markdown(
-                f"""
-                <div style="text-align: center; margin-bottom: 15px">
-                <img src="data:image/png;base64,{architecture_base64}" style="width: 40%;">
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    with col1:
 
-    st.write("Under the hood, the .wav file is converted into 10 second spectrograms which are then ultimately represented by a single numpy array. This array is sent up to our custom sagemaker endpoint which hosts our fine-tuned PANN model. Once the input is fed through the model, the endpoint returns the predictions. The predictions are then processed, thresholded, and fed to ChatGPT to provide dynamic user feedback. Ultimately, the output serves the user the top three effects found in the submitted segment, a timeline of where those effects are found in the song, and further descriptive information about each effect such as famous songs using those effects and recommended effect pedals.")
+        st.markdown("<h3 style='color: #667085; font-weight: 600; letter-spacing: -0.5px; margin-top: 0;'>Data Source and Data Science Approach</h3>""",
+    unsafe_allow_html=True)
+
+        spectrogram = effect_to_image.get("spectrogram")
+        diagram = effect_to_image.get("diagram")
+        architecture = effect_to_image.get("architecture")
+        Gary = effect_to_image.get("Gary")
+        Rex = effect_to_image.get("Rex")
+        Kushal = effect_to_image.get("Kushal")
+        Jen = effect_to_image.get("Jen")
+
+        with open(architecture, "rb") as img_file:  
+            architecture_base64 = base64.b64encode(img_file.read()).decode()
+        with open(spectrogram, "rb") as img_file:
+            spectrogram_base64 = base64.b64encode(img_file.read()).decode()
+        with open(Gary, "rb") as img_file:
+            Gary_base64 = base64.b64encode(img_file.read()).decode()
+        with open(Rex, "rb") as img_file:
+            Rex_base64 = base64.b64encode(img_file.read()).decode()
+        with open(Kushal, "rb") as img_file:
+            Kushal_base64 = base64.b64encode(img_file.read()).decode()
+        with open(Jen, "rb") as img_file:
+            Jen_base64 = base64.b64encode(img_file.read()).decode()
+
+        #st.subheader("Data Source and Data Science Approach")
+        st.write("Our team has created a simple, user-friendly web application that beginner guitar players can use to learn about different guitar effects used in their favorite songs. Users can upload a .wav file of the guitar segment or full song they would like to learn about. If there is a certain segment they are interested in, they can use the cropping feature to only analyze that portion of the song. Once the upload process is complete, users can click on the classify button.")
+        with open(architecture, "rb") as img_file:
+                    architecture_base64 = base64.b64encode(img_file.read()).decode()
+        st.markdown(
+                    f"""
+                    <div style="text-align: center; margin-bottom: 15px">
+                    <img src="data:image/png;base64,{architecture_base64}" style="width: 40%;">
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        st.write("Under the hood, the .wav file is converted into 10 second spectrograms which are then ultimately represented by a single numpy array. This array is sent up to our custom sagemaker endpoint which hosts our fine-tuned PANN model. Once the input is fed through the model, the endpoint returns the predictions. The predictions are then processed, thresholded, and fed to ChatGPT to provide dynamic user feedback. Ultimately, the output serves the user the top three effects found in the submitted segment, a timeline of where those effects are found in the song, and further descriptive information about each effect such as famous songs using those effects and recommended effect pedals.")
+        st.markdown(
+            f"""
+            <div style="text-align: center; margin-bottom: 15px;">
+            <img src="data:image/png;base64,{spectrogram_base64}" style="width: 60%;">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.write("What makes ToneClone possible is the creation of a new, synthetic dataset of labeled guitar effects. We started with publicly available guitar arrangements and converted them to MIDI. These tracks were then processed through a high-quality virtual guitar instrument to generate realistic, clean guitar recordings. Next, we applied a wide range of digital effects and labeled them for later model training.")
+        st.write("This dataset includes 100 songs, each processed with 45 different effect combinations, resulting in more than 450 hours of data.")
+        
+        with open(diagram, "rb") as img_file:
+            diagram_base64 = base64.b64encode(img_file.read()).decode()
+        # Display the diagram image
+        st.markdown(
+            f"""
+            <div style="text-align: center; margin-bottom: 15px;">
+            <img src="data:image/png;base64,{diagram_base64}" style="width: 60%;">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    #st.markdown("<hr>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="title-text" style="font-size: 42px; letter-spacing: -0.5px; margin-bottom: 10px;">Meet the ToneClone Team</div>
+    """,
+    unsafe_allow_html=True)
+
+    # Team member 
     st.markdown(
-        f"""
-        <div style="text-align: center; margin-bottom: 15px;">
-        <img src="data:image/png;base64,{spectrogram_base64}" style="width: 60%;">
-        </div>
-        """,
-        unsafe_allow_html=True
+    f"""
+    <div style="display: flex; align-items: center; margin: 5px 0;">
+    <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; margin-right: 20px;">
+    <img src="data:image/png;base64,{Gary_base64}" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    <div>
+    <h4 style="margin: 0;">Gary Dionne</h4>
+    <p style="margin: 0px 0 0 0; color: #666;">
+    <a href="mailto:gbdionne@berkeley.edu" style="text-decoration: none; color: #0066cc;">gbdionne@berkeley.edu</a>
+    </p>
+    </div>
+    </div>
+    <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.2), rgba(0,0,0,0)); margin: 5px 0;">
+    """,
+    unsafe_allow_html=True
     )
 
-    st.write("What makes ToneClone possible is the creation of a new, synthetic dataset of labeled guitar effects. We started with publicly available guitar arrangements and converted them to MIDI. These tracks were then processed through a high-quality virtual guitar instrument to generate realistic, clean guitar recordings. Next, we applied a wide range of digital effects and labeled them for later model training.")
-    st.write("This dataset includes 100 songs, each processed with 45 different effect combinations, resulting in more than 450 hours of data.")
-    
-    with open(diagram, "rb") as img_file:
-        diagram_base64 = base64.b64encode(img_file.read()).decode()
-    # Display the diagram image
+
     st.markdown(
-        f"""
-        <div style="text-align: center; margin-bottom: 15px;">
-        <img src="data:image/png;base64,{diagram_base64}" style="width: 60%;">
-        </div>
-        """,
-        unsafe_allow_html=True
+    f"""
+    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+    <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; margin-right: 20px;">
+    <img src="data:image/png;base64,{Jen_base64}" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    <div>
+    <h4 style="margin: 0;">Jennifer Tejeda</h4>
+    <p style="margin: 0px 0 0 0; color: #666;">
+    <a href="mailto:jtejeda@berkeley.edu" style="text-decoration: none; color: #0066cc;">jtejeda@berkeley.edu</a>
+    </p>
+    </div>
+    </div>
+    <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.2), rgba(0,0,0,0)); margin: 5px 0;">
+    """,
+    unsafe_allow_html=True
     )
 
+    # Team member 3
+    st.markdown(
+    f"""
+    <div style="display: flex; align-items: center; margin: 5px 0;">
+    <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; margin-right: 20px;">
+    <img src="data:image/png;base64,{Rex_base64}" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    <div>
+    <h4 style="margin: 0;">Rex Gao</h4>
+    <p style="margin: 0px 0 0 0; color: #666;">
+    <a href="mailto:rexgao@berkeley.edu" style="text-decoration: none; color: #0066cc;">rexgao@berkeley.edu</a>
+    </p>
+    </div>
+    </div>
+    <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.2), rgba(0,0,0,0)); margin: 5px 0;">
+    """,
+    unsafe_allow_html=True
+    )
+
+    # Team member 4
+    st.markdown(
+    f"""
+    <div style="display: flex; align-items: center; margin: 5px 0;">
+    <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; margin-right: 20px;">
+    <img src="data:image/png;base64,{Kushal_base64}" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    <div>
+    <h4 style="margin: 0;">Kushal Gourikrishna</h4>
+    <p style="margin: 0px 0 0 0; color: #666;">
+    <a href="kgourikrishna@berkeley.edu" style="text-decoration: none; color: #0066cc;">kgourikrishna@berkeley.edu</a>
+    </p>
+    </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
 
 
 
