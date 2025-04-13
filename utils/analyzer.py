@@ -66,7 +66,7 @@ class ToneCloneAnalyzer:
         with wave.open(self.file_path, 'rb') as wav:
             num_channels = wav.getnchannels()
             sample_rate = wav.getframerate()
-            print(f"Original sample rate: {sample_rate} Hz")
+            #print(f"Original sample rate: {sample_rate} Hz")
             num_frames = wav.getnframes()
 
             audio_data = np.frombuffer(wav.readframes(num_frames), dtype=np.int16)
@@ -75,7 +75,7 @@ class ToneCloneAnalyzer:
 
             # Resample if needed
             if sample_rate != self.target_sr:
-                print(f"Resampling from {sample_rate} Hz to {self.target_sr} Hz...")
+                #print(f"Resampling from {sample_rate} Hz to {self.target_sr} Hz...")
                 audio_data = librosa.resample(audio_data.astype(np.float32), orig_sr=sample_rate, target_sr=self.target_sr)
                 sample_rate = self.target_sr  # Update sample rate
 
@@ -146,7 +146,7 @@ class ToneCloneAnalyzer:
         #print(f"Total segments: {total_segments}")
 
         for start in range(0, total_segments, self.max_segments_per_request):
-            end = start + self.max_segments_per_request
+            end = min(start + self.max_segments_per_request, total_segments)
             chunk = spectrograms[start:end]
 
             # Serialize to .npy format as expected by the endpoint
@@ -155,6 +155,7 @@ class ToneCloneAnalyzer:
             buffer.seek(0)
 
             try:
+                #print(f"Submitting segments {start} to {end} (chunk size: {len(chunk)})")
                 response = runtime.invoke_endpoint(
                     EndpointName=self.endpoint_name,
                     ContentType='application/x-npy',
@@ -164,15 +165,23 @@ class ToneCloneAnalyzer:
 
                 result = response['Body'].read().decode('utf-8')
                 parsed_json = json.loads(result)
+                #print(parsed_json)
                 responses.append(parsed_json)
             except Exception as e:
                 raise RuntimeError(f"Failed to invoke endpoint for batch {start}-{end}: {e}")
 
+        #print('\n\nFull responses list:\n\n'+str(responses))
+
         # Merge all responses into a single ordered dict
         combined = {}
-        for batch in responses:
-            combined.update(batch)
+        global_segment_index = 1
 
+        for batch in responses:
+            for local_key in batch:
+                combined[f"Segment {global_segment_index}"] = batch[local_key]
+                global_segment_index += 1
+
+        print('\n\Modified responses list:\n\n'+str(combined))
         self.raw_predictions = combined
     
     def categorize_effect_confidence(self):

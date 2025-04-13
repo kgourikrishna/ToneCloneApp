@@ -89,10 +89,10 @@ class ToneCloneChatAgent:
                         "For `notable_artist_usage`, give the name of a famous artist or song that uses this effect, and explain briefly how the effect is used in that musical context."
                 }
         
-        print(user_message)
+        #print(user_message)
         
         self.messages.append(user_message)
-        print(self.messages)
+        #print(self.messages)
 
         response = self.client.responses.create(
             model=self.llm_model,

@@ -40,10 +40,10 @@ effect_to_image = {
     "delay": os.path.join(IMAGES_DIR, "pedal_DLY.png"),
     "chorus": os.path.join(IMAGES_DIR, "pedal_CHR.png"),
     "flanger": os.path.join(IMAGES_DIR, "pedal_FLG.png"),
-    "fuzz": os.path.join(IMAGES_DIR, "pedal_FUZ.png"),
+    "fuzz": os.path.join(IMAGES_DIR, "pedal_fuz.png"),
     "auto filter": os.path.join(IMAGES_DIR, "pedal_FLT.png"),
-    "overdrive": os.path.join(IMAGES_DIR, "pedal_ODV.png"),
-    "octaver": os.path.join(IMAGES_DIR, "pedal_OCT.png"),
+    "overdrive": os.path.join(IMAGES_DIR, "pedal_odv.png"),
+    "octaver": os.path.join(IMAGES_DIR, "pedal_oct.png"),
     "tremolo": os.path.join(IMAGES_DIR, "pedal_TRM.png"),  
     "phaser": os.path.join(IMAGES_DIR, "pedal_PHZ.png"),
     "hall reverb": os.path.join(IMAGES_DIR, "pedal_HLL.png"),
@@ -138,7 +138,9 @@ def display_waveform(y, sr, start_time, end_time):
     
     # Return both figure and config
     return fig
-def display_timeline(segments, sample_length, overlap):
+
+
+def display_timeline(segments, sample_length, overlap, effects, path_state):
     """
     Displays a timeline graph of detected effects with probabilities shown by intensity
     """
@@ -147,16 +149,20 @@ def display_timeline(segments, sample_length, overlap):
         minutes, seconds = map(int, t.split(':'))
         return minutes * 60 + seconds
 
-    effects = dict()
-    for seg in segments:
-        for eff in segments[seg][0]:
-            if eff not in effects:
-                effects[eff] = 1
-            else:
-                effects[eff] += 1
-    effects = sorted(effects.keys(), key=lambda x: x, reverse=False)
-    start_time = st.session_state['start_time']
-    end_time = st.session_state['end_time']
+    # effects = dict()
+    # for seg in segments:
+    #     for eff in segments[seg][0]:
+    #         if eff not in effects:
+    #             effects[eff] = 1
+    #         else:
+    #             effects[eff] += 1
+    # effects = sorted(effects.keys(), key=lambda x: x, reverse=False)
+    if path_state == "cropped_path":
+        start_time = st.session_state['start_time']
+        end_time = st.session_state['end_time']
+    else:
+        start_time = 0.0
+        end_time = st.session_state['current_audio_duration']
 
     time_resolution = sample_length * (100.0 - overlap) / 100.0
     time_axis = np.arange(start_time, end_time, time_resolution)
@@ -171,7 +177,7 @@ def display_timeline(segments, sample_length, overlap):
             overlapping = [
                 segments[seg] for seg in segments
                 if eff in segments[seg][0]
-                and t <= int(seg.split("Segment ")[1]) * time_resolution < t + time_resolution
+                and t - start_time <= (int(seg.split("Segment ")[1]) - 1) * time_resolution < t + time_resolution - start_time
             ]
             if overlapping:
                 avg_intensity = np.mean([seg[1][eff] for seg in overlapping])
@@ -211,7 +217,8 @@ def display_timeline(segments, sample_length, overlap):
     ax.set_xlabel("Time (mm:ss)")
     return fig
 
-def classify_song(file_path):
+def classify_song(path_state):
+    file_path = st.session_state[path_state]
     tcanalyzer = ToneCloneAnalyzer(str(file_path), openai_key=st.secrets["openai_key"])
     tcanalyzer.process_wav_for_model()
     tcanalyzer.submit_spectrogram_batches(
@@ -224,7 +231,7 @@ def classify_song(file_path):
     st.session_state['summarized_segment_results'] = summarized_segment_results
     st.session_state['predictions_summary_for_llm'] = predictions_summary_for_llm
     st.session_state['timeline_visualization'] = display_timeline(raw_predictions, tcanalyzer.sample_length,
-                                                                  tcanalyzer.overlap)
+                                                                  tcanalyzer.overlap, top_3_effects, path_state)
     tcanalyzer.chatgpt_prompt()
     user_education = tcanalyzer.parse_effects_json()
 
@@ -1209,8 +1216,7 @@ def show_audio_page():
                 if 'current_audio_path' in st.session_state:
                     with st.spinner("Classifying full song..."):
                         try:
-                            file_path = st.session_state['current_audio_path']
-                            user_education, top_3_effects = classify_song(file_path)
+                            user_education, top_3_effects = classify_song('current_audio_path')
                             
                             # Store results in session state
                             st.session_state['top_3_effects'] = top_3_effects
@@ -1227,8 +1233,7 @@ def show_audio_page():
                 if 'cropped_path' in st.session_state:
                     with st.spinner("Classifying cropped segment..."):
                         try:
-                            cropped_path = st.session_state['cropped_path']
-                            user_education, top_3_effects = classify_song(cropped_path)
+                            user_education, top_3_effects = classify_song('cropped_path')
                             
                             # Store results in session state
                             st.session_state['top_3_effects'] = top_3_effects
