@@ -40,10 +40,10 @@ effect_to_image = {
     "delay": os.path.join(IMAGES_DIR, "pedal_DLY.png"),
     "chorus": os.path.join(IMAGES_DIR, "pedal_CHR.png"),
     "flanger": os.path.join(IMAGES_DIR, "pedal_FLG.png"),
-    "fuzz": os.path.join(IMAGES_DIR, "pedal_FUZ.png"),
+    "fuzz": os.path.join(IMAGES_DIR, "pedal_fuz.png"),
     "auto filter": os.path.join(IMAGES_DIR, "pedal_FLT.png"),
-    "overdrive": os.path.join(IMAGES_DIR, "pedal_ODV.png"),
-    "octaver": os.path.join(IMAGES_DIR, "pedal_OCT.png"),
+    "overdrive": os.path.join(IMAGES_DIR, "pedal_odv.png"),
+    "octaver": os.path.join(IMAGES_DIR, "pedal_oct.png"),
     "tremolo": os.path.join(IMAGES_DIR, "pedal_TRM.png"),  
     "phaser": os.path.join(IMAGES_DIR, "pedal_PHZ.png"),
     "hall reverb": os.path.join(IMAGES_DIR, "pedal_HLL.png"),
@@ -176,15 +176,15 @@ def display_timeline(segments, sample_length, overlap, effects, path_state):
         for t in time_axis:
             overlapping = [
                 segments[seg] for seg in segments
-                if eff in segments[seg][0]
+                if eff in segments[seg]["effects"]
                 and t - start_time <= (int(seg.split("Segment ")[1]) - 1) * time_resolution < t + time_resolution - start_time
             ]
             if overlapping:
-                avg_intensity = np.mean([seg[1][eff] for seg in overlapping])
+                avg_intensity = np.mean([seg["effects"][eff]['value'] for seg in overlapping])
             else:
                 avg_intensity = 0
             rect = patches.Rectangle(
-                (t, i + 0.25), time_resolution, 0.5,
+                (t, i + 0.25), end_time - t, 0.5,
                 color=base_colors[i % len(base_colors)],
                 alpha=avg_intensity ** 2,
                 linewidth=0
@@ -230,7 +230,7 @@ def classify_song(path_state):
     st.session_state['raw_predictions'] = raw_predictions
     st.session_state['summarized_segment_results'] = summarized_segment_results
     st.session_state['predictions_summary_for_llm'] = predictions_summary_for_llm
-    st.session_state['timeline_visualization'] = display_timeline(raw_predictions, tcanalyzer.sample_length,
+    st.session_state['timeline_visualization'] = display_timeline(summarized_segment_results, tcanalyzer.sample_length,
                                                                   tcanalyzer.overlap, top_3_effects, path_state)
     tcanalyzer.chatgpt_prompt()
     user_education = tcanalyzer.parse_effects_json()
